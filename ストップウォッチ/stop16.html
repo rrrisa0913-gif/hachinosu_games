@@ -1,0 +1,188 @@
+<div id="game-ui">
+  <img id="logo-main" src="logo.png" alt="main logo">
+
+  <img id="logo-sub" src="logo2.png" alt="sub logo">
+
+  <div id="time">00:15</div>
+
+  <div class="controls">
+    <button id="toggle" class="icon">
+      <img id="toggleIcon" src="play.png" alt="">
+    </button>
+
+    <button id="reset" class="icon">
+      <img src="reset.png" alt="">
+    </button>
+  </div>
+
+  <audio id="buzzer" src="buzzer.mp3"></audio>
+</div>
+
+<style>
+
+body {
+  margin: 0;
+  background: #000;
+  color: #0f0;
+  font-family: "Arial Black", Impact, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#game-ui {
+  position: relative;
+  text-align: center;
+}
+
+#logo-main {
+  width: 60vw;
+  max-width: 800px;
+  margin-bottom: -10px;
+}
+
+#logo-sub {
+  position: absolute;
+  top: 20px;
+  right: 40px;
+  width: 100px;
+  opacity: 0.8;
+}
+
+#game-ui {
+  text-align: center;
+}
+
+#time {
+  font-size: 20vw;
+  letter-spacing: 0.05em;
+  color: #ff5fa2;
+  text-shadow: 0 0 25px #ff5fa2;
+}
+
+.warning {
+  color: #f00;
+  text-shadow: 0 0 30px #f00;
+  animation: blink 0.5s infinite alternate;
+}
+
+@keyframes blink {
+  from { opacity: 1; }
+  to   { opacity: 0.3; }
+}
+
+.controls button.icon {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
+.controls button.icon img {
+  width: 256px;
+  height: 256px;
+  pointer-events: none;
+}
+
+.controls {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+}
+
+.controls button.icon:hover {
+  box-shadow: 0 0 20px rgba(255, 95, 162, 0.5);
+  background: rgba(255, 95, 162, 0.2);
+}
+
+.controls button.icon:active {
+  transform: scale(0.9);
+}
+</style>
+
+<script>
+const time = document.getElementById('time');
+const toggleButton = document.getElementById('toggle');
+const toggleIcon = document.getElementById('toggleIcon');
+const resetButton = document.getElementById('reset');
+const buzzer = document.getElementById('buzzer');
+
+let totalTime = 15 * 1000;
+let startTime;
+let stopTime = 0;
+let timeoutID;
+let isRunning = false;
+
+function displayTime() {
+  const now = Date.now();
+  const elapsed = now - startTime + stopTime;
+  const remaining = totalTime - elapsed;
+
+if (remaining <= 5000) {
+  time.classList.add("warning");
+} else {
+  time.classList.remove("warning");
+}
+
+  if (remaining <= 0) {
+    time.textContent = "00:00";
+    clearTimeout(timeoutID);
+    buzzer.currentTime = 0;
+    buzzer.play();
+    return;
+  }
+
+  const seconds = Math.floor(remaining / 1000);
+  const ms = Math.floor((remaining % 1000) / 10);
+
+  time.textContent =
+    String(seconds).padStart(2, '0') +
+    ":" +
+    String(ms).padStart(2, '0');
+
+  timeoutID = setTimeout(displayTime, 10);
+}
+
+toggleButton.addEventListener('click', () => {
+  if (!isRunning) {
+    if (!startTime) startTime = Date.now();  // startTime 初期化
+    displayTime();
+    toggleIcon.src = "pause.png";
+    isRunning = true;
+  } else {
+    clearTimeout(timeoutID);
+    stopTime += Date.now() - startTime;
+    startTime = null;
+    toggleIcon.src = "play.png";
+    isRunning = false;
+
+    buzzer.pause();
+    buzzer.currentTime = 0;
+  }
+});
+resetButton.addEventListener('click', () => {
+  clearTimeout(timeoutID);
+  startTime = null;
+  stopTime = 0;
+  isRunning = false;
+
+  time.textContent = "00:15";
+  time.classList.remove("warning");
+  toggleIcon.src = "play.png";
+
+  buzzer.pause();
+  buzzer.currentTime = 0;
+});
+
+</script>
+
+</body>
+</html>
